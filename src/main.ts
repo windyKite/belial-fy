@@ -10,12 +10,11 @@ export const translate = (word) => {
   const query: string = querystring.stringify({
     q: word,
     from: 'en',
-    to: 'zh', 
+    to: 'zh',
     appid,
     salt,
     sign,
   })
-  console.log(query)
 
   const options = {
     hostname: 'api.fanyi.baidu.com',
@@ -25,22 +24,29 @@ export const translate = (word) => {
   };
 
   const request = https.request(options, (response) => {
-    console.log('状态码:', response.statusCode);
-    console.log('请求头:', response.headers);
-
-    response.on('data', (d) => {
-      console.log('d')
-      process.stdout.write(d);
+    let chunks = [];
+    response.on('data', (chunk) => {
+      chunks.push(chunk);
     });
 
+    response.on('end', () => {
+      const string = Buffer.concat(chunks).toString();
+      type baiduResult = {
+        error_code?: string;
+        error_msg?: string;
+        from: string;
+        to: string;
+        trans_result: { src: string; dst: string }[]
+      }
+      const object: baiduResult = JSON.parse(string)
+      console.log(object.trans_result[0].dst);
+    })
   });
 
 
   request.on('error', (e) => {
-    console.log('1')
     console.error(e);
   });
 
   request.end();
-
 }
