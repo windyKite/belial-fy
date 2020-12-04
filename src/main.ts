@@ -1,40 +1,46 @@
 import * as https from 'https'
 import * as querystring from 'querystring'
 const md5 = require('md5')
+import { appid, secret } from './private'
 
 export const translate = (word) => {
-  const appid = ''
-  const secret = ''
   const salt = Math.random()
   const sign = md5(appid + word + salt + secret)
 
   const query: string = querystring.stringify({
     q: word,
     from: 'en',
-    to: 'zh',
+    to: 'zh', 
     appid,
     salt,
     sign,
   })
+  console.log(query)
+
   const options = {
-    hostname: 'https://fanyi-api.baidu.com',
+    hostname: 'api.fanyi.baidu.com',
     port: 443,
-    path: '/api/trans/vip/translate' + query,
+    path: '/api/trans/vip/translate?' + query,
     method: 'GET'
   };
 
-  const req = https.request(options, (res) => {
-    console.log('状态码:', res.statusCode);
-    console.log('请求头:', res.headers);
+  const request = https.request(options, (response) => {
+    console.log('状态码:', response.statusCode);
+    console.log('请求头:', response.headers);
 
-    res.on('data', (d) => {
+    response.on('data', (d) => {
+      console.log('d')
       process.stdout.write(d);
     });
+
   });
 
-  req.on('error', (e) => {
+
+  request.on('error', (e) => {
+    console.log('1')
     console.error(e);
   });
-  req.end();
+
+  request.end();
 
 }
